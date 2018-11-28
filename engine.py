@@ -4,6 +4,7 @@
 import base64
 import errno
 import os
+import time
 
 from selenium import webdriver
 
@@ -98,6 +99,28 @@ def grab_lxr_yingli(code):
         i = i + 1
 
 
+def grab_ths_zst(code):
+    log('获取走势图')
+    url = 'http://data.10jqka.com.cn/market/lhbgg/code/%s/' % code
+    brower.get(url)
+    brower.implicitly_wait(30)
+
+    brower.switch_to.frame(1)
+    key = ".draw-type.klView"
+    btn_list = brower.find_elements_by_css_selector(key)
+    log(len(btn_list))
+    prefix = 'ths_zst_'
+    name_list = ['day', 'week', 'month']
+    i = 0
+    for btn in btn_list:
+        btn.click()
+        time.sleep(1)
+        canvas = brower.find_element_by_id('tcanvas')
+        log(canvas)
+        save_image(canvas, code, prefix + name_list[i])
+        i = i + 1
+
+
 def get_code_type(code):
     type = 'sh'
     if code[0] == '0':
@@ -110,4 +133,7 @@ def log(content):
 
 
 if __name__ == '__main__':
-    grab_lxr_data('002050')
+    code = '002050'
+    grab_lxr_data(code)
+    grab_ths_zst(code)
+    log('完成')
