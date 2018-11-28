@@ -5,7 +5,9 @@ import base64
 import errno
 import os
 import time
+from io import BytesIO
 
+from PIL import Image
 from selenium import webdriver
 
 from private.account import LXR
@@ -19,16 +21,25 @@ def save_image(canvas, code, filename):
     # decode
     canvas_png = base64.b64decode(canvas_base64)
     # save to a file
+    path = get_path(code, filename)
+    create_path(path)
+    with open(path, 'wb') as f:
+        log('保存图片到 %s' % path)
+        f.write(canvas_png)
+
+
+def get_path(code, filename):
     path = os.path.join('private/' + code, filename + r".png")
+    return path
+
+
+def create_path(path):
     if not os.path.exists(os.path.dirname(path)):
         try:
             os.makedirs(os.path.dirname(path))
         except OSError as e:  # Guard against race condition
             if e.errno != errno.EEXIST:
                 raise
-    with open(path, 'wb') as f:
-        log('保存图片到 %s' % path)
-        f.write(canvas_png)
 
 
 def grab_lxr_data(code):
@@ -49,9 +60,6 @@ def grab_lxr_data(code):
     log('点击登陆按钮')
 
     grab_lxr_guzhi(code)
-
-    # yingli_btn = brower.find_element_by_link_text('盈利分析')
-    # yingli_btn.click()
     grab_lxr_yingli(code)
 
 
@@ -108,7 +116,6 @@ def grab_ths_zst(code):
     brower.switch_to.frame(1)
     key = ".draw-type.klView"
     btn_list = brower.find_elements_by_css_selector(key)
-    log(len(btn_list))
     prefix = 'ths_zst_'
     name_list = ['day', 'week', 'month']
     i = 0
@@ -116,7 +123,6 @@ def grab_ths_zst(code):
         btn.click()
         time.sleep(1)
         canvas = brower.find_element_by_id('tcanvas')
-        log(canvas)
         save_image(canvas, code, prefix + name_list[i])
         i = i + 1
 
@@ -132,8 +138,87 @@ def log(content):
     print('========>> %s ' % content)
 
 
+def save_element_image(png, element, code, filename):
+    log('从元素获取图片')
+    location = element.location
+    size = element.size
+
+    im = Image.open(BytesIO(png))  # uses PIL library to open image in memory
+    left = location['x']
+    top = location['y']
+    right = location['x'] + size['width']
+    bottom = location['y'] + size['height']
+
+    im = im.crop((left, top, right, bottom))  # defines crop points
+    path = get_path(code, filename)
+    create_path(path)
+    im.save(path)  # saves new cropped image
+
+
+def save_rect_element(png, left, top, right, bottom, code, filename):
+    log('从元素获取图片')
+    im = Image.open(BytesIO(png))  # uses PIL library to open image in memory
+    im = im.crop((left, top, right, bottom))  # defines crop points
+    path = get_path(code, filename)
+    create_path(path)
+    im.save(path)  # saves new cropped image
+
+
+def grab_ths_brief(code):
+    log('获取公司概要')
+    url = 'http://basic.10jqka.com.cn/%s/' % code
+    brower.get(url)
+    brower.implicitly_wait(30)
+    key = ".bd"
+    element_list = brower.find_elements_by_css_selector(key)
+    element = element_list[1]
+    png = brower.get_screenshot_as_png()
+    save_element_image(png, element, code, 'ths_brief')
+
+
+def grab_ths_operate(code):
+    log('主营构成分析')
+    url = 'http://basic.10jqka.com.cn/%s/operate.html' % code
+    brower.get(url)
+    brower.implicitly_wait(30)
+    parent = brower.find_element_by_id('analysis')
+    key = "clearfix"
+    element = parent.find_element_by_class_name(key)
+    brower.execute_script("arguments[0].scrollIntoView();", element)
+
+    head = brower.find_element_by_class_name('header')
+    brower.execute_script('$(arguments[0]).fadeOut()', head)
+    search = brower.find_element_by_css_selector('.iwc_searchbar.clearfix.float_box')
+    brower.execute_script('$(arguments[0]).fadeOut()', search)
+    time.sleep(1)
+
+    left = element.location['x']
+    top = 0
+
+    width = element.size['width']
+    height = 0.3 * width
+
+    right = left + width
+    bottom = top + height
+
+    png = brower.get_screenshot_as_png()
+    save_rect_element(png, left, top, right, bottom, code, 'ths_product')
+
+
 if __name__ == '__main__':
     code = '002050'
-    grab_lxr_data(code)
-    grab_ths_zst(code)
-    log('完成')
+    # grab_lxr_data(code)
+    # grab_ths_zst(code)
+    # grab_ths_brief(code)
+    grab_ths_operate(code)
+    log('大功告成')
+
+'''
+#将页面滚动条拖到底部
+js = "document.documentElement.scrollTop=400"
+brower.execute_script(js)
+time.sleep(1)
+
+
+
+'''
