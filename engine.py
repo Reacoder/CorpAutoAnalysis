@@ -26,18 +26,18 @@ def save_image(canvas, code, filename):
             if e.errno != errno.EEXIST:
                 raise
     with open(path, 'wb') as f:
+        log('保存图片到 %s' % path)
         f.write(canvas_png)
 
 
-def grab_data_from_lxr(code):
-    type = 'sh'
-    if code[0] == '0':
-        type = 'sz'
-    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (type, code)
+def grab_lxr_data(code):
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (
+        get_code_type(code), code)
     brower.get(url)
     brower.implicitly_wait(30)  # 隐性等待，最长等30秒
     goto_login_btn = brower.find_element_by_css_selector('.btn.btn-success.ng-binding')
     goto_login_btn.click()
+    log('点击去登陆按钮')
     brower.implicitly_wait(10)
     username_input = brower.find_element_by_name('uniqueName')
     password_input = brower.find_element_by_name('password')
@@ -45,13 +45,69 @@ def grab_data_from_lxr(code):
     password_input.send_keys(lxr.password)
     login_btn = brower.find_element_by_css_selector('.btn.btn-primary.text-capitalize.pull-right.ng-isolate-scope')
     login_btn.click()
+    log('点击登陆按钮')
+
+    grab_lxr_guzhi(code)
+
+    # yingli_btn = brower.find_element_by_link_text('盈利分析')
+    # yingli_btn.click()
+    grab_lxr_yingli(code)
+
+
+def grab_lxr_guzhi(code):
+    log('获取估值分析')
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (
+        get_code_type(code), code)
+    brower.get(url)
     brower.implicitly_wait(30)
-    canvas_list = brower.find_elements_by_css_selector(".chart.chart-line.ng-isolate-scope.chartjs-render-monitor")
-    i = 1
+    key = ".chart.chart-line.ng-isolate-scope.chartjs-render-monitor"
+    canvas_list = brower.find_elements_by_css_selector(key)
+    i = 0
+    prefix = 'lxr_gz_'
+    name_list = ['pe'
+        , 'pb'
+        , 'ps'
+        , 'guxi']
     for canvas in canvas_list:
-        save_image(canvas, code, str(i))
+        save_image(canvas, code, prefix + name_list[i])
         i = i + 1
 
 
+def grab_lxr_yingli(code):
+    log('获取盈利分析')
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/profit' % (
+        get_code_type(code), code)
+    brower.get(url)
+    brower.implicitly_wait(30)
+    key = ".chart.chart-line.ng-scope.ng-isolate-scope.chartjs-render-monitor"
+    canvas_list = brower.find_elements_by_css_selector(key)
+    prefix = 'lxr_yl_'
+    name_list = ['roe_jiaquan'
+        , 'roe_guimu'
+        , ''
+        , 'ganggan'
+        , ''
+        , 'zhouzhuan'
+        , 'jinglirunlv'
+        , ''
+        , '']
+    i = 0
+    for canvas in canvas_list:
+        if len(name_list[i]) > 0:
+            save_image(canvas, code, prefix + name_list[i])
+        i = i + 1
+
+
+def get_code_type(code):
+    type = 'sh'
+    if code[0] == '0':
+        type = 'sz'
+    return type
+
+
+def log(content):
+    print('========>> %s ' % content)
+
+
 if __name__ == '__main__':
-    grab_data_from_lxr('002050')
+    grab_lxr_data('002050')
