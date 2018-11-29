@@ -22,15 +22,28 @@ def save_image(canvas, code, filename):
     # decode
     canvas_png = base64.b64decode(canvas_base64)
     # save to a file
-    path = get_path(code, filename)
+    path = get_img_path(code, filename)
     create_path(path)
     with open(path, 'wb') as f:
         log('保存图片到 %s' % path)
         f.write(canvas_png)
 
 
-def get_path(code, filename):
+def save_file(code, filename, text):
+    path = get_file_path(code, filename)
+    create_path(path)
+    with open(path, 'a') as f:
+        log('保存文本到 %s' % path)
+        f.write(text)
+
+
+def get_img_path(code, filename):
     path = os.path.join('private/' + code, filename + r".png")
+    return path
+
+
+def get_file_path(code, filename):
+    path = os.path.join('private/' + code, filename + r".txt")
     return path
 
 
@@ -146,7 +159,7 @@ def save_rect_element(png, left, top, right, bottom, code, filename):
     bottom = FACTOR * bottom
     im = Image.open(BytesIO(png))  # uses PIL library to open image in memory
     im = im.crop((left, top, right, bottom))  # defines crop points
-    path = get_path(code, filename)
+    path = get_img_path(code, filename)
     log('保存图片到 %s' % path)
     create_path(path)
     im.save(path)  # saves new cropped image
@@ -162,6 +175,9 @@ def grab_ths_brief(code):
     scroll_to_element(element)
     hide_float_search()
     save_element(element, code, 'img_brief')
+    # 题材要点
+    element = driver.find_element_by_css_selector(".gntc")
+    save_file(code, 'file_theme', element.text)
 
 
 def grab_ths_operate(code):
@@ -179,11 +195,88 @@ def grab_ths_operate(code):
     element = element_list[3]
     scroll_to_element(element)
     save_element(element, code, 'img_partner')
+    # 董事会经营评述
+    driver.find_elements_by_css_selector(".more.fr")[0].click()
+    driver.implicitly_wait(10)
+    element = driver.find_elements_by_css_selector(".f14.none.clearfix.pr")[0]
+    save_file(code, 'file_operate', element.text)
 
 
-def save_element(element, code, filename):
+def grab_ths_holder(code):
+    log('股东研究')
+    url = 'http://basic.10jqka.com.cn/%s/holder.html' % code
+    driver.get(url)
+    driver.implicitly_wait(30)
+    element_list = driver.find_elements_by_css_selector(".bd.pt5")
+    # 股东人数
+    element = element_list[0]
+    scroll_to_element(element)
+    hide_float_search()
+    save_element(element, code, 'img_holder_count')
+    # 十大流通股东
+    element = element_list[1]
+    scroll_to_element(element)
+    save_element(element, code, 'img_holder_ten_circulation')
+    # 十大股东
+    element = element_list[2]
+    scroll_to_element(element)
+    save_element(element, code, 'img_holder_ten')
+    # 控股层级关系
+    element = element_list[3]
+    scroll_to_element(element)
+    log(element.location['y'])
+    save_element(element, code, 'img_controller', y=element.size['width'] * 0.35)
+
+
+def grab_ths_worth(code):
+    log('盈利预测')
+    url = 'http://basic.10jqka.com.cn/%s/worth.html' % code
+    driver.get(url)
+    driver.implicitly_wait(30)
+    element_list = driver.find_elements_by_css_selector(".bd")
+    # 业绩预测
+    element = element_list[1]
+    scroll_to_element(element)
+    hide_float_search()
+    save_element(element, code, 'img_worth_forecast')
+    # 业绩预测详表
+    element = element_list[2]
+    scroll_to_element(element)
+    save_element(element, code, 'img_worth_forecast_table')
+
+
+def grab_ths_news(code):
+    log('新闻公告')
+    url = 'http://basic.10jqka.com.cn/%s/news.html' % code
+    driver.get(url)
+    driver.implicitly_wait(30)
+    element = driver.find_element_by_css_selector(".bd.m_dlbox")
+    scroll_to_element(element)
+    # 研报评级
+    tr_list = driver.find_elements_by_css_selector(".organ_item")
+
+    # link_list = driver.find_elements_by_css_selector(".client.pagescroll")
+    for tr in tr_list:
+        link = tr.find_element_by_css_selector(".client.pagescroll")
+        td_list = tr.find_elements_by_tag_name('td')
+        title = td_list[1].text + " " * 6 + td_list[2].text + " " * 6 + td_list[3].text + "\n"
+        title = title + "=" * 40 + "\n"
+        save_file(code, 'file_worth', title)
+
+        window_before = driver.window_handles[0]
+        link.click()
+        driver.implicitly_wait(10)
+        window_after = driver.window_handles[1]
+        driver.switch_to.window(window_after)
+        element = driver.find_element_by_css_selector(".YBText")
+        save_file(code, 'file_worth', element.text)
+        driver.switch_to.window(window_before)
+        driver.implicitly_wait(10)
+
+
+def save_element(element, code, filename, y=0):
     left = element.location['x']
-    top = 0
+    top = y
     width = element.size['width']
     height = element.size['height']
     right = left + width
@@ -199,15 +292,19 @@ def scroll_to_element(element):
 def hide_float_search():
     head = driver.find_element_by_class_name('header')
     driver.execute_script('$(arguments[0]).fadeOut()', head)
-    search = driver.find_element_by_css_selector('.iwc_searchbar.clearfix.float_box')
+    search = driver.find_element_by_css_selector('.searchfx')
     driver.execute_script('$(arguments[0]).fadeOut()', search)
     time.sleep(1)
 
 
 if __name__ == '__main__':
-    code = '002050'
-    grab_lxr_data(code)
-    grab_ths_trend(code)
-    grab_ths_brief(code)
-    grab_ths_operate(code)
+    code = '600373'
+    # driver.maximize_window()
+    # grab_lxr_data(code)
+    # grab_ths_trend(code)
+    # grab_ths_brief(code)
+    # grab_ths_operate(code)
+    # grab_ths_holder(code)
+    # grab_ths_worth(code)
+    grab_ths_news(code)
     log('大功告成')
