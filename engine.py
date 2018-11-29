@@ -73,8 +73,10 @@ def grab_lxr_data(code):
     login_btn.click()
     log('点击登陆按钮')
 
-    grab_lxr_valuation(code)
-    grab_lxr_profit(code)
+    # grab_lxr_valuation(code)
+    # grab_lxr_profit(code)
+    # grab_lxr_growth(code)
+    grab_lxr_costs(code)
 
 
 def grab_lxr_valuation(code):
@@ -112,6 +114,50 @@ def grab_lxr_profit(code):
         , ''
         , 'turnover'
         , 'profit_rate'
+        , ''
+        , '']
+    i = 0
+    for canvas in canvas_list:
+        if len(name_list[i]) > 0:
+            save_image(canvas, code, prefix + name_list[i])
+        i = i + 1
+
+
+def grab_lxr_growth(code):
+    log('获取成长分析')
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/growth' % (
+        get_code_type(code), code)
+    driver.get(url)
+    driver.implicitly_wait(30)
+    key = ".chart.chart-bar.ng-scope.ng-isolate-scope.chartjs-render-monitor"
+    canvas_list = driver.find_elements_by_css_selector(key)
+    prefix = 'img_growth_'
+    name_list = ['total_income'
+        , 'profit'
+        , 'profit_exclude'
+        , 'cash_flow'
+        , '']
+    i = 0
+    for canvas in canvas_list:
+        if len(name_list[i]) > 0:
+            save_image(canvas, code, prefix + name_list[i])
+        i = i + 1
+
+
+def grab_lxr_costs(code):
+    log('获取成本分析')
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/costs' % (
+        get_code_type(code), code)
+    driver.get(url)
+    driver.implicitly_wait(30)
+    key = ".chart.chart-line.ng-scope.ng-isolate-scope.chartjs-render-monitor"
+    canvas_list = driver.find_elements_by_css_selector(key)
+    prefix = 'img_costs_'
+    name_list = ['gross_profit_rate'
+        , 'three_fee_rate'
+        , 'sale_fee_rate'
+        , 'manage_fee_rate'
+        , 'finance_fee_rate'
         , ''
         , '']
     i = 0
@@ -371,14 +417,14 @@ if __name__ == '__main__':
     code = '600373'
     # driver.execute_script("document.body.style.zoom='80%'")
     # driver.maximize_window()
-    # grab_lxr_data(code)
+    grab_lxr_data(code)
     # grab_ths_trend(code)
-    grab_ths_brief(code)
-    grab_ths_operate(code)
-    grab_ths_holder(code)
-    grab_ths_worth(code)
-    grab_ths_news(code)
-    grab_ths_position(code)
-    grab_ths_bonus(code)
-    grab_ths_event(code)
+    # grab_ths_brief(code)
+    # grab_ths_operate(code)
+    # grab_ths_holder(code)
+    # grab_ths_worth(code)
+    # grab_ths_news(code)
+    # grab_ths_position(code)
+    # grab_ths_bonus(code)
+    # grab_ths_event(code)
     log('大功告成')
