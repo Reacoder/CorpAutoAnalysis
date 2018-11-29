@@ -140,16 +140,14 @@ def log(content):
 
 
 def save_rect_element(png, left, top, right, bottom, code, filename):
-    log('从元素获取图片')
-
     left = FACTOR * left
     top = FACTOR * top
     right = FACTOR * right
     bottom = FACTOR * bottom
-
     im = Image.open(BytesIO(png))  # uses PIL library to open image in memory
     im = im.crop((left, top, right, bottom))  # defines crop points
     path = get_path(code, filename)
+    log('保存图片到 %s' % path)
     create_path(path)
     im.save(path)  # saves new cropped image
 
