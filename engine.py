@@ -12,12 +12,13 @@ from selenium import webdriver
 
 from private.account import LXR
 
-brower = webdriver.Chrome()
+driver = webdriver.Chrome()
 lxr = LXR()
+FACTOR = 2  # 分辨率高的为2，低的为1
 
 
 def save_image(canvas, code, filename):
-    canvas_base64 = brower.execute_script("return arguments[0].toDataURL('image/png').substring(21);", canvas)
+    canvas_base64 = driver.execute_script("return arguments[0].toDataURL('image/png').substring(21);", canvas)
     # decode
     canvas_png = base64.b64decode(canvas_base64)
     # save to a file
@@ -45,59 +46,59 @@ def create_path(path):
 def grab_lxr_data(code):
     url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (
         get_code_type(code), code)
-    brower.get(url)
-    brower.implicitly_wait(30)  # 隐性等待，最长等30秒
-    goto_login_btn = brower.find_element_by_css_selector('.btn.btn-success.ng-binding')
+    driver.get(url)
+    driver.implicitly_wait(30)  # 隐性等待，最长等30秒
+    goto_login_btn = driver.find_element_by_css_selector('.btn.btn-success.ng-binding')
     goto_login_btn.click()
     log('点击去登陆按钮')
-    brower.implicitly_wait(10)
-    username_input = brower.find_element_by_name('uniqueName')
-    password_input = brower.find_element_by_name('password')
+    driver.implicitly_wait(10)
+    username_input = driver.find_element_by_name('uniqueName')
+    password_input = driver.find_element_by_name('password')
     username_input.send_keys(lxr.username)
     password_input.send_keys(lxr.password)
-    login_btn = brower.find_element_by_css_selector('.btn.btn-primary.text-capitalize.pull-right.ng-isolate-scope')
+    login_btn = driver.find_element_by_css_selector('.btn.btn-primary.text-capitalize.pull-right.ng-isolate-scope')
     login_btn.click()
     log('点击登陆按钮')
 
-    grab_lxr_guzhi(code)
-    grab_lxr_yingli(code)
+    grab_lxr_valuation(code)
+    grab_lxr_profit(code)
 
 
-def grab_lxr_guzhi(code):
+def grab_lxr_valuation(code):
     log('获取估值分析')
     url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (
         get_code_type(code), code)
-    brower.get(url)
-    brower.implicitly_wait(30)
+    driver.get(url)
+    driver.implicitly_wait(30)
     key = ".chart.chart-line.ng-isolate-scope.chartjs-render-monitor"
-    canvas_list = brower.find_elements_by_css_selector(key)
+    canvas_list = driver.find_elements_by_css_selector(key)
     i = 0
-    prefix = 'lxr_gz_'
+    prefix = 'img_valuation_'
     name_list = ['pe'
         , 'pb'
         , 'ps'
-        , 'guxi']
+        , 'dividend']
     for canvas in canvas_list:
         save_image(canvas, code, prefix + name_list[i])
         i = i + 1
 
 
-def grab_lxr_yingli(code):
+def grab_lxr_profit(code):
     log('获取盈利分析')
     url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/profit' % (
         get_code_type(code), code)
-    brower.get(url)
-    brower.implicitly_wait(30)
+    driver.get(url)
+    driver.implicitly_wait(30)
     key = ".chart.chart-line.ng-scope.ng-isolate-scope.chartjs-render-monitor"
-    canvas_list = brower.find_elements_by_css_selector(key)
-    prefix = 'lxr_yl_'
-    name_list = ['roe_jiaquan'
-        , 'roe_guimu'
+    canvas_list = driver.find_elements_by_css_selector(key)
+    prefix = 'img_profit_'
+    name_list = ['roe_weight'
+        , 'roe'
         , ''
-        , 'ganggan'
+        , 'leverage'
         , ''
-        , 'zhouzhuan'
-        , 'jinglirunlv'
+        , 'turnover'
+        , 'profit_rate'
         , ''
         , '']
     i = 0
@@ -107,22 +108,22 @@ def grab_lxr_yingli(code):
         i = i + 1
 
 
-def grab_ths_zst(code):
+def grab_ths_trend(code):
     log('获取走势图')
     url = 'http://data.10jqka.com.cn/market/lhbgg/code/%s/' % code
-    brower.get(url)
-    brower.implicitly_wait(30)
+    driver.get(url)
+    driver.implicitly_wait(30)
 
-    brower.switch_to.frame(1)
+    driver.switch_to.frame(1)
     key = ".draw-type.klView"
-    btn_list = brower.find_elements_by_css_selector(key)
-    prefix = 'ths_zst_'
+    btn_list = driver.find_elements_by_css_selector(key)
+    prefix = 'img_trend_'
     name_list = ['day', 'week', 'month']
     i = 0
     for btn in btn_list:
         btn.click()
         time.sleep(1)
-        canvas = brower.find_element_by_id('tcanvas')
+        canvas = driver.find_element_by_id('tcanvas')
         save_image(canvas, code, prefix + name_list[i])
         i = i + 1
 
@@ -138,25 +139,14 @@ def log(content):
     print('========>> %s ' % content)
 
 
-def save_element_image(png, element, code, filename):
-    log('从元素获取图片')
-    location = element.location
-    size = element.size
-
-    im = Image.open(BytesIO(png))  # uses PIL library to open image in memory
-    left = location['x']
-    top = location['y']
-    right = location['x'] + size['width']
-    bottom = location['y'] + size['height']
-
-    im = im.crop((left, top, right, bottom))  # defines crop points
-    path = get_path(code, filename)
-    create_path(path)
-    im.save(path)  # saves new cropped image
-
-
 def save_rect_element(png, left, top, right, bottom, code, filename):
     log('从元素获取图片')
+
+    left = FACTOR * left
+    top = FACTOR * top
+    right = FACTOR * right
+    bottom = FACTOR * bottom
+
     im = Image.open(BytesIO(png))  # uses PIL library to open image in memory
     im = im.crop((left, top, right, bottom))  # defines crop points
     path = get_path(code, filename)
@@ -165,60 +155,61 @@ def save_rect_element(png, left, top, right, bottom, code, filename):
 
 
 def grab_ths_brief(code):
-    log('获取公司概要')
+    log('公司概要')
     url = 'http://basic.10jqka.com.cn/%s/' % code
-    brower.get(url)
-    brower.implicitly_wait(30)
-    key = ".bd"
-    element_list = brower.find_elements_by_css_selector(key)
+    driver.get(url)
+    driver.implicitly_wait(30)
+    element_list = driver.find_elements_by_css_selector(".bd")
     element = element_list[1]
-    png = brower.get_screenshot_as_png()
-    save_element_image(png, element, code, 'ths_brief')
+    scroll_to_element(element)
+    hide_float_search()
+    save_element(element, code, 'img_brief')
 
 
 def grab_ths_operate(code):
-    log('主营构成分析')
+    log('经营分析')
     url = 'http://basic.10jqka.com.cn/%s/operate.html' % code
-    brower.get(url)
-    brower.implicitly_wait(30)
-    parent = brower.find_element_by_id('analysis')
-    key = "clearfix"
-    element = parent.find_element_by_class_name(key)
-    brower.execute_script("arguments[0].scrollIntoView();", element)
+    driver.get(url)
+    driver.implicitly_wait(30)
+    element_list = driver.find_elements_by_css_selector(".bd.pt5")
+    # 公司产品
+    element = element_list[2]
+    scroll_to_element(element)
+    hide_float_search()
+    save_element(element, code, 'img_product_category')
+    # 上下游
+    element = element_list[3]
+    scroll_to_element(element)
+    save_element(element, code, 'img_partner')
 
-    head = brower.find_element_by_class_name('header')
-    brower.execute_script('$(arguments[0]).fadeOut()', head)
-    search = brower.find_element_by_css_selector('.iwc_searchbar.clearfix.float_box')
-    brower.execute_script('$(arguments[0]).fadeOut()', search)
-    time.sleep(1)
 
+def save_element(element, code, filename):
     left = element.location['x']
     top = 0
-
     width = element.size['width']
-    height = 0.3 * width
-
+    height = element.size['height']
     right = left + width
     bottom = top + height
+    png = driver.get_screenshot_as_png()
+    save_rect_element(png, left, top, right, bottom, code, filename)
 
-    png = brower.get_screenshot_as_png()
-    save_rect_element(png, left, top, right, bottom, code, 'ths_product')
+
+def scroll_to_element(element):
+    driver.execute_script("arguments[0].scrollIntoView();", element)
+
+
+def hide_float_search():
+    head = driver.find_element_by_class_name('header')
+    driver.execute_script('$(arguments[0]).fadeOut()', head)
+    search = driver.find_element_by_css_selector('.iwc_searchbar.clearfix.float_box')
+    driver.execute_script('$(arguments[0]).fadeOut()', search)
+    time.sleep(1)
 
 
 if __name__ == '__main__':
     code = '002050'
-    # grab_lxr_data(code)
-    # grab_ths_zst(code)
-    # grab_ths_brief(code)
+    grab_lxr_data(code)
+    grab_ths_trend(code)
+    grab_ths_brief(code)
     grab_ths_operate(code)
     log('大功告成')
-
-'''
-#将页面滚动条拖到底部
-js = "document.documentElement.scrollTop=400"
-brower.execute_script(js)
-time.sleep(1)
-
-
-
-'''
