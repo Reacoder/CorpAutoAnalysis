@@ -177,7 +177,7 @@ def grab_ths_brief(code):
     save_element(element, code, 'img_brief')
     # 题材要点
     element = driver.find_element_by_css_selector(".gntc")
-    save_file(code, 'file_theme', element.text)
+    save_file(code, 'file_concept', element.text)
 
 
 def grab_ths_operate(code):
@@ -293,15 +293,15 @@ def grab_ths_news(code):
         driver.implicitly_wait(10)
 
 
-def grab_ths_concept(code):
-    log('概念题材')
-    url = 'http://basic.10jqka.com.cn/%s/concept.html' % code
-    driver.get(url)
-    driver.implicitly_wait(30)
-    driver.find_elements_by_css_selector(".conAllBtn")[2].click()
-    driver.implicitly_wait(3)
-    element = driver.find_element_by_id("material")
-    save_file(code, 'file_concept', element.text)
+# def grab_ths_concept(code):
+#     log('概念题材')
+#     url = 'http://basic.10jqka.com.cn/%s/concept.html' % code
+#     driver.get(url)
+#     driver.implicitly_wait(30)
+#     driver.find_elements_by_css_selector(".conAllBtn")[2].click()
+#     driver.implicitly_wait(3)
+#     element = driver.find_element_by_id("material")
+#     save_file(code, 'file_concept', element.text)
 
 
 def grab_ths_position(code):
@@ -378,7 +378,6 @@ if __name__ == '__main__':
     grab_ths_holder(code)
     grab_ths_worth(code)
     grab_ths_news(code)
-    grab_ths_concept(code)
     grab_ths_position(code)
     grab_ths_bonus(code)
     grab_ths_event(code)
