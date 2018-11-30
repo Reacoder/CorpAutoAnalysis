@@ -97,11 +97,11 @@ def grab_lxr_data(code):
     log('点击登陆按钮')
     time.sleep(2)
 
-    # grab_lxr_valuation(code)
-    # grab_lxr_profit(code)
-    # grab_lxr_growth(code)
-    # grab_lxr_costs(code)
-    # grab_lxr_asset(code)
+    grab_lxr_valuation(code)
+    grab_lxr_profit(code)
+    grab_lxr_growth(code)
+    grab_lxr_costs(code)
+    grab_lxr_asset(code)
     grab_lxr_debt(code)
 
 
@@ -113,6 +113,7 @@ def grab_lxr_valuation(code):
     driver.implicitly_wait(30)
     key = ".chart.chart-line.ng-isolate-scope.chartjs-render-monitor"
     canvas_list = driver.find_elements_by_css_selector(key)
+    text_list = driver.find_elements_by_css_selector('.list-unstyled.metric-info')
     i = 0
     prefix = 'img_valuation_'
     name_list = ['pe'
@@ -121,6 +122,7 @@ def grab_lxr_valuation(code):
         , 'dividend']
     for canvas in canvas_list:
         save_image(canvas, code, prefix + name_list[i])
+        save_json(code, name_list[i], text_list[i].text)
         i = i + 1
 
 
@@ -132,6 +134,7 @@ def grab_lxr_profit(code):
     driver.implicitly_wait(30)
     key = ".chart.chart-line.ng-scope.ng-isolate-scope.chartjs-render-monitor"
     canvas_list = driver.find_elements_by_css_selector(key)
+    text_list = driver.find_elements_by_css_selector('.list-unstyled.metric-info')
     prefix = 'img_profit_'
     name_list = ['roe_weight'
         , 'roe'
@@ -146,6 +149,7 @@ def grab_lxr_profit(code):
     for canvas in canvas_list:
         if len(name_list[i]) > 0:
             save_image(canvas, code, prefix + name_list[i])
+            save_json(code, name_list[i], text_list[i].text)
         i = i + 1
 
 
@@ -157,6 +161,7 @@ def grab_lxr_growth(code):
     driver.implicitly_wait(30)
     key = ".chart.chart-bar.ng-scope.ng-isolate-scope.chartjs-render-monitor"
     canvas_list = driver.find_elements_by_css_selector(key)
+    text_list = driver.find_elements_by_css_selector('.list-unstyled.metric-info')
     prefix = 'img_growth_'
     name_list = ['total_income'
         , 'profit'
@@ -167,6 +172,7 @@ def grab_lxr_growth(code):
     for canvas in canvas_list:
         if len(name_list[i]) > 0:
             save_image(canvas, code, prefix + name_list[i])
+            save_json(code, name_list[i], text_list[i].text)
         i = i + 1
 
 
@@ -178,6 +184,7 @@ def grab_lxr_costs(code):
     driver.implicitly_wait(30)
     key = ".chart.chart-line.ng-scope.ng-isolate-scope.chartjs-render-monitor"
     canvas_list = driver.find_elements_by_css_selector(key)
+    text_list = driver.find_elements_by_css_selector('.list-unstyled.metric-info')
     prefix = 'img_costs_'
     name_list = ['gross_profit_rate'
         , 'three_fee_rate'
@@ -190,6 +197,7 @@ def grab_lxr_costs(code):
     for canvas in canvas_list:
         if len(name_list[i]) > 0:
             save_image(canvas, code, prefix + name_list[i])
+            save_json(code, name_list[i], text_list[i].text)
         i = i + 1
 
 
