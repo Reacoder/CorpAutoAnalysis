@@ -11,12 +11,20 @@ from PIL import Image
 import config
 
 
-def save_file(code, filename, text):
+def save_file(code, filename, text, mode='w'):
     path = get_file_path(code, filename)
     create_path(path)
-    with open(path, 'a') as f:
+    with open(path, mode) as f:
         log('保存文本到 %s' % path)
         f.write(text)
+
+
+def read_file(code, filename):
+    path = get_file_path(code, filename)
+    if not os.path.isfile(path):
+        return ''
+    with open(path, 'r') as f:
+        return f.read()
 
 
 def load_json(code):
@@ -60,10 +68,10 @@ def create_path(path):
 
 
 def get_code_type(code):
-    type = 'sh'
+    code_type = 'sh'
     if code[0] == '0':
-        type = 'sz'
-    return type
+        code_type = 'sz'
+    return code_type
 
 
 def log(content):

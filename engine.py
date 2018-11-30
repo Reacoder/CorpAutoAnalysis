@@ -314,12 +314,13 @@ def grab_ths_news(code):
     # 研报评级
     tr_list = driver.find_elements_by_css_selector(".organ_item")
 
+    i = 0
     for tr in tr_list:
         link = tr.find_element_by_css_selector(".client.pagescroll")
         td_list = tr.find_elements_by_tag_name('td')
         title = td_list[1].text + "\n" + td_list[2].text + "\n" + td_list[3].text + "\n"
         title = title + "-" * 50 + "\n"
-        util.save_file(code, 'file_worth', title)
+        util.save_file(code, 'file_worth', title, mode='a')
 
         window_before = driver.window_handles[0]
         link.click()
@@ -327,9 +328,12 @@ def grab_ths_news(code):
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         element = driver.find_element_by_css_selector(".YBText")
-        util.save_file(code, 'file_worth', element.text + "\n\n" + "=" * 50 + "\n\n")
+        util.save_file(code, 'file_worth', element.text + "\n" * 5, mode='a')
         driver.switch_to.window(window_before)
         driver.implicitly_wait(10)
+        if i == config.WORTH_COUNT:
+            break
+        i = i + 1
 
 
 # def grab_ths_concept(code):
