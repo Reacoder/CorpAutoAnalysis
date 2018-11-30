@@ -1,7 +1,9 @@
+#!/usr/local/bin/python
+# coding: utf-8
+
 from docx import Document
 from docx.shared import Inches
 
-# import engine
 import util
 
 document = Document()
@@ -15,6 +17,9 @@ def generate_doc(code):
     document.add_heading(my_dict['code_name'], 0)
     # 走势图
     document.add_heading('走势图', level=1)
+    document.add_heading('1.周k线', level=2)
+    document.add_picture(my_dir + 'img_trend_week.png', width=pic_width)
+    document.add_heading('2.日k线', level=2)
     document.add_picture(my_dir + 'img_trend_day.png', width=pic_width)
     # 一.公司概要
     document.add_heading('一.公司概要', level=1)
@@ -23,14 +28,19 @@ def generate_doc(code):
     document.add_heading('二.业务构成', level=1)
     document.add_picture(my_dir + 'img_operate_product.png', width=pic_width)
     document.add_heading('1.毛利率', level=2)
+    document.add_paragraph(my_dict['gross_profit_rate'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_costs_gross_profit_rate.png', width=pic_width)
     document.add_heading('2.三项费用率', level=2)
+    document.add_paragraph(my_dict['three_fee_rate'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_costs_three_fee_rate.png', width=pic_width)
     document.add_heading('3.销售费用率', level=2)
+    document.add_paragraph(my_dict['sale_fee_rate'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_costs_sale_fee_rate.png', width=pic_width)
     document.add_heading('4.管理费用率', level=2)
+    document.add_paragraph(my_dict['manage_fee_rate'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_costs_manage_fee_rate.png', width=pic_width)
     document.add_heading('5.财务费用率', level=2)
+    document.add_paragraph(my_dict['finance_fee_rate'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_costs_finance_fee_rate.png', width=pic_width)
     # 三.股东占比情况
     document.add_heading('三.股东占比情况', level=1)
@@ -51,14 +61,19 @@ def generate_doc(code):
     document.add_heading('1.主要客户及供应商', level=2)
     document.add_picture(my_dir + 'img_operate_partner.png', width=pic_width)
     document.add_heading('2.加权ROE', level=2)
+    document.add_paragraph(my_dict['roe_weight'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_profit_roe_weight.png', width=pic_width)
     document.add_heading('3.归属于母公司股东的ROE', level=2)
+    document.add_paragraph(my_dict['roe'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_profit_roe.png', width=pic_width)
     document.add_heading('4.杠杆倍数', level=2)
+    document.add_paragraph(my_dict['leverage'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_profit_leverage.png', width=pic_width)
     document.add_heading('5.资产周转率', level=2)
+    document.add_paragraph(my_dict['turnover'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_profit_turnover.png', width=pic_width)
     document.add_heading('6.净利润率', level=2)
+    document.add_paragraph(my_dict['profit_rate'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_profit_profit_rate.png', width=pic_width)
     # 五.成长性评估
     document.add_heading('五.成长性评估', level=1)
@@ -70,20 +85,27 @@ def generate_doc(code):
     # 六.估值分析
     document.add_heading('六.估值分析', level=1)
     document.add_heading('1.PE-TTM (扣非)', level=2)
+    document.add_paragraph(my_dict['pe'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_valuation_pe.png', width=pic_width)
     document.add_heading('2.PB (不含商誉)', level=2)
+    document.add_paragraph(my_dict['pb'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_valuation_pb.png', width=pic_width)
     document.add_heading('3.PS-TTM', level=2)
+    document.add_paragraph(my_dict['ps'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_valuation_ps.png', width=pic_width)
     # 七.收入，利润，现金流分析
     document.add_heading('七.收入，利润，现金流分析', level=1)
     document.add_heading('1.营业总收入', level=2)
+    document.add_paragraph(my_dict['total_income'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_growth_total_income.png', width=pic_width)
     document.add_heading('2.营业利润', level=2)
+    document.add_paragraph(my_dict['profit'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_growth_profit.png', width=pic_width)
     document.add_heading('3.归属于母公司股东的扣非净利润', level=2)
+    document.add_paragraph(my_dict['profit_exclude'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_growth_profit_exclude.png', width=pic_width)
     document.add_heading('4.经营活动产生的现金流量净额', level=2)
+    document.add_paragraph(my_dict['cash_flow'].replace('\n', ' ' * 3))
     document.add_picture(my_dir + 'img_growth_cash_flow.png', width=pic_width)
     # 八.资产负债分析
     document.add_heading('八.资产负债分析', level=1)
@@ -101,10 +123,10 @@ def generate_doc(code):
     document.add_heading('十一.董事会经营评述', level=1)
     document.add_paragraph(util.read_file(code, 'file_operate'))
     # 保存文档
-    document.save('private/' + code + '/' + 'demo.docx')
+    document.save('private/' + code + '/' + 'analysis' + r'.docx')
+    util.log('成功生成文档')
 
 
 if __name__ == '__main__':
     code = '600519'
-    # engine.start(code)
     generate_doc(code)

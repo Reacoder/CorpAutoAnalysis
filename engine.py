@@ -191,8 +191,12 @@ def grab_ths_trend(code):
     for btn in btn_list:
         btn.click()
         time.sleep(1)
-        canvas = driver.find_element_by_id('tcanvas')
-        save_image(canvas, code, prefix + name_list[i])
+        element = driver.find_element_by_id('canvasPanel')
+        scroll_to_element(element)
+        time.sleep(1)
+        save_element(element, code, prefix + name_list[i])
+        # canvas = driver.find_element_by_id('tcanvas')
+        # save_image(canvas, code, prefix + name_list[i])
         i = i + 1
 
 
@@ -276,8 +280,8 @@ def grab_ths_holder(code):
     # 控股层级关系
     element = element_list[3]
     scroll_to_element(element)
-    util.log(element.location['y'])
-    save_element(element, code, 'img_controller', y=element.size['width'] * config.CONTROLLER_Y)
+    top = element.size['width']*0.6 - element.size['height']
+    save_element(element, code, 'img_controller', y=top)
 
 
 def grab_ths_worth(code):
@@ -314,7 +318,7 @@ def grab_ths_news(code):
     # 研报评级
     tr_list = driver.find_elements_by_css_selector(".organ_item")
 
-    i = 0
+    i = 1
     for tr in tr_list:
         link = tr.find_element_by_css_selector(".client.pagescroll")
         td_list = tr.find_elements_by_tag_name('td')
@@ -328,7 +332,7 @@ def grab_ths_news(code):
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         element = driver.find_element_by_css_selector(".YBText")
-        util.save_file(code, 'file_worth', element.text + "\n" * 5, mode='a')
+        util.save_file(code, 'file_worth', element.text + "\n" * 4, mode='a')
         driver.switch_to.window(window_before)
         driver.implicitly_wait(10)
         if i == config.WORTH_COUNT:
@@ -433,7 +437,7 @@ def start(code):
     grab_ths_position(code)
     grab_ths_bonus(code)
     grab_ths_event(code)
-    util.log('大功告成')
+    util.log('引擎运行完毕')
 
 
 if __name__ == '__main__':
@@ -442,12 +446,12 @@ if __name__ == '__main__':
     # driver.maximize_window()
     # grab_lxr_data(code)
     # grab_ths_trend(code)
-    grab_ths_brief(code)
+    # grab_ths_brief(code)
     # grab_ths_operate(code)
-    # grab_ths_holder(code)
+    grab_ths_holder(code)
     # grab_ths_worth(code)
     # grab_ths_news(code)
     # grab_ths_position(code)
     # grab_ths_bonus(code)
     # grab_ths_event(code)
-    util.log('大功告成')
+    util.log('引擎运行完毕')
