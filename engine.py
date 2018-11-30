@@ -3,6 +3,7 @@
 
 import base64
 import errno
+import json
 import os
 import time
 from io import BytesIO
@@ -14,7 +15,8 @@ from private.account import LXR
 
 driver = webdriver.Chrome()
 lxr = LXR()
-FACTOR = 1  # 分辨率高的为2，低的为1
+FACTOR = 2  # 分辨率高的为2，低的为1
+CONTROLLER_Y = 0.35  # 分辨率高的为0.35，低的为0.25
 
 
 def save_image(canvas, code, filename):
@@ -35,6 +37,27 @@ def save_file(code, filename, text):
     with open(path, 'a') as f:
         log('保存文本到 %s' % path)
         f.write(text)
+
+
+def load_json(code):
+    path = get_file_path(code, 'json')
+    create_path(path)
+    with open(path, 'r') as f:
+        saved_data = json.load(f)
+        log('从 %s 取出 %s ' % (path, str(saved_data)))
+        return saved_data
+
+
+def save_json(code, key, value):
+    path = get_file_path(code, 'json')
+    create_path(path)
+    saved_data = {}
+    if os.path.isfile(path):
+        saved_data = load_json(code)
+    saved_data[key] = value
+    with open(path, 'w') as f:
+        log('保存 { %s : %s } 到 %s ' % (key, value, path))
+        json.dump(saved_data, f)
 
 
 def get_img_path(code, filename):
@@ -72,11 +95,14 @@ def grab_lxr_data(code):
     login_btn = driver.find_element_by_css_selector('.btn.btn-primary.text-capitalize.pull-right.ng-isolate-scope')
     login_btn.click()
     log('点击登陆按钮')
+    time.sleep(2)
 
     # grab_lxr_valuation(code)
     # grab_lxr_profit(code)
     # grab_lxr_growth(code)
-    grab_lxr_costs(code)
+    # grab_lxr_costs(code)
+    # grab_lxr_asset(code)
+    grab_lxr_debt(code)
 
 
 def grab_lxr_valuation(code):
@@ -165,6 +191,44 @@ def grab_lxr_costs(code):
         if len(name_list[i]) > 0:
             save_image(canvas, code, prefix + name_list[i])
         i = i + 1
+
+
+def grab_lxr_asset(code):
+    log('资产结构分析')
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/asset' % (
+        get_code_type(code), code)
+    driver.get(url)
+    driver.implicitly_wait(30)
+    key = ".chart.chart-line.ng-isolate-scope.chartjs-render-monitor"
+    canvas = driver.find_element_by_css_selector(key)
+    name = 'img_asset'
+    time.sleep(1)
+    save_image(canvas, code, name)
+    # 保存详情
+    element = driver.find_element_by_css_selector('.chart-pie-cta')
+    scroll_to_element(element)
+    driver.execute_script('document.getElementsByClassName("btn-cta")[0].style.display = "none";')
+    time.sleep(1)
+    save_element(element, code, 'img_asset_detail', y=FACTOR * 40)
+
+
+def grab_lxr_debt(code):
+    log('负债结构分析')
+    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/debt' % (
+        get_code_type(code), code)
+    driver.get(url)
+    driver.implicitly_wait(30)
+    key = ".chart.chart-line.ng-isolate-scope.chartjs-render-monitor"
+    canvas = driver.find_element_by_css_selector(key)
+    name = 'img_debt'
+    time.sleep(1)
+    save_image(canvas, code, name)
+    # 保存详情
+    element = driver.find_element_by_css_selector('.chart-pie-cta')
+    scroll_to_element(element)
+    driver.execute_script('document.getElementsByClassName("btn-cta")[0].style.display = "none";')
+    time.sleep(1)
+    save_element(element, code, 'img_debt_detail', y=FACTOR * 40)
 
 
 def grab_ths_trend(code):
@@ -281,10 +345,7 @@ def grab_ths_holder(code):
     element = element_list[3]
     scroll_to_element(element)
     log(element.location['y'])
-    # 公司
-    # save_element(element, code, 'img_controller', y=element.size['width'] * 0.35)
-    # 家里
-    save_element(element, code, 'img_controller', y=element.size['width'] * 0.25)
+    save_element(element, code, 'img_controller', y=element.size['width'] * CONTROLLER_Y)
 
 
 def grab_ths_worth(code):
@@ -414,7 +475,7 @@ def hide_float_search():
 
 
 if __name__ == '__main__':
-    code = '600373'
+    code = '600519'
     # driver.execute_script("document.body.style.zoom='80%'")
     # driver.maximize_window()
     grab_lxr_data(code)
