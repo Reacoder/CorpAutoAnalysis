@@ -4,11 +4,24 @@
 import errno
 import json
 import os
+import pickle
 from io import BytesIO
 
 from PIL import Image
 
 import config
+
+
+def save_cookie(driver, path):
+    with open(path, 'wb') as f:
+        pickle.dump(driver.get_cookies(), f)
+
+
+def load_cookie(driver, path):
+    with open(path, 'rb') as f:
+        cookies = pickle.load(f)
+        for cookie in cookies:
+            driver.add_cookie(cookie)
 
 
 def save_file(code, filename, text, mode='w'):

@@ -13,26 +13,37 @@ from private.account import LXR
 
 driver = webdriver.Chrome()
 lxr = LXR()
+cookie_path = 'private/cookie_lxr.txt'
 
 
 def grab_lxr_data(code):
-    url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (
-        util.get_code_type(code), code)
+    util.log('获取理杏仁数据')
+    util.create_path(cookie_path)
+    url = 'https://www.lixinger.com'
     driver.get(url)
-    driver.implicitly_wait(30)  # 隐性等待，最长等30秒
-    goto_login_btn = driver.find_element_by_css_selector('.btn.btn-success.ng-binding')
-    goto_login_btn.click()
-    util.log('点击去登陆按钮')
-    driver.implicitly_wait(10)
-    username_input = driver.find_element_by_name('uniqueName')
-    password_input = driver.find_element_by_name('password')
-    username_input.send_keys(lxr.username)
-    password_input.send_keys(lxr.password)
-    login_btn = driver.find_element_by_css_selector('.btn.btn-primary.text-capitalize.pull-right.ng-isolate-scope')
-    login_btn.click()
-    util.log('点击登陆按钮')
-    time.sleep(2)
-
+    time.sleep(1)
+    try:
+        util.load_cookie(driver, cookie_path)
+    except FileNotFoundError:
+        url = 'https://www.lixinger.com/analytics/company/%s/%s/detail/fundamental/value/primary' % (
+            util.get_code_type(code), code)
+        driver.get(url)
+        driver.implicitly_wait(30)  # 隐性等待，最长等30秒
+        goto_login_btn = driver.find_element_by_css_selector('.btn.btn-success.ng-binding')
+        goto_login_btn.click()
+        util.log('点击去登陆按钮')
+        driver.implicitly_wait(10)
+        username_input = driver.find_element_by_name('uniqueName')
+        password_input = driver.find_element_by_name('password')
+        username_input.send_keys(lxr.username)
+        password_input.send_keys(lxr.password)
+        login_btn = driver.find_element_by_css_selector('.btn.btn-primary.text-capitalize.pull-right.ng-isolate-scope')
+        login_btn.click()
+        util.log('点击登陆按钮')
+        time.sleep(2)
+        util.save_cookie(driver, cookie_path)
+        util.log('登陆成功')
+    # 开始获取数据
     grab_lxr_valuation(code)
     grab_lxr_profit(code)
     grab_lxr_growth(code)
@@ -478,7 +489,8 @@ def save_image(canvas, code, filename):
         f.write(canvas_png)
 
 
-def start(code):
+def start():
+    code = config.CODE
     grab_lxr_data(code)
     grab_ths_trend(code)
     grab_ths_brief(code)
@@ -496,8 +508,8 @@ if __name__ == '__main__':
     code = config.CODE
     # driver.execute_script("document.body.style.zoom='80%'")
     # driver.maximize_window()
-    # grab_lxr_data(code)
-    grab_ths_trend(code)
+    grab_lxr_data(code)
+    # grab_ths_trend(code)
     # grab_ths_brief(code)
     # grab_ths_operate(code)
     # grab_ths_holder(code)

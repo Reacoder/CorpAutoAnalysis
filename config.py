@@ -3,5 +3,5 @@
 
 FACTOR = 1  # 分辨率高的为2，低的为1
 WORTH_COUNT = 5  # 研报数量
-# CODE = '600519'
-CODE = '601988'
+LOCAL_DIR = '/Users/zhaosam/PycharmProjects/CorpAutoAnalysis/'
+CODE = '000333'

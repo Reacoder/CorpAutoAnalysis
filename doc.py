@@ -12,7 +12,8 @@ import util
 document = Document()
 
 
-def generate_doc(code):
+def generate_doc():
+    code = config.CODE
     my_dir = 'private/' + code + '/'
     my_dict = util.load_json(code)
     pic_width = Inches(7)
