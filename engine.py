@@ -5,6 +5,7 @@ import base64
 import time
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 
 import config
 import util
@@ -35,9 +36,15 @@ def grab_lxr_data(code):
     grab_lxr_valuation(code)
     grab_lxr_profit(code)
     grab_lxr_growth(code)
-    grab_lxr_costs(code)
-    grab_lxr_asset(code)
-    grab_lxr_debt(code)
+    try:
+        driver.find_element_by_link_text('成本分析')
+        grab_lxr_costs(code)
+        grab_lxr_asset(code)
+        grab_lxr_debt(code)
+    except NoSuchElementException:
+        util.log('没有成本分析')
+        util.log('没有资产分析')
+        util.log('没有负债分析')
 
 
 def grab_lxr_valuation(code):
@@ -178,7 +185,9 @@ def grab_ths_trend(code):
     util.log('获取走势图')
     url = 'http://data.10jqka.com.cn/market/lhbgg/code/%s/' % code
     driver.get(url)
-    driver.implicitly_wait(30)
+    time.sleep(1)
+    driver.get(url)
+    time.sleep(2)
     title_element = driver.find_element_by_class_name('fz24')
     util.save_json(code, 'code_name', title_element.text)
     driver.switch_to.frame(1)
@@ -242,10 +251,13 @@ def grab_ths_operate(code):
     hide_float_search()
     save_element(element, code, 'img_operate_product')
     # <!-- 主要客户及供应商 -->
-    provider = driver.find_element_by_id('provider')
-    element = provider.find_element_by_css_selector('.bd.pt5')
-    scroll_to_element(element)
-    save_element(element, code, 'img_operate_partner')
+    try:
+        provider = driver.find_element_by_id('provider')
+        element = provider.find_element_by_css_selector('.bd.pt5')
+        scroll_to_element(element)
+        save_element(element, code, 'img_operate_partner')
+    except NoSuchElementException:
+        pass
 
     # # 上下游
     # element = element_list[3]
@@ -280,8 +292,31 @@ def grab_ths_holder(code):
     # 控股层级关系
     element = element_list[3]
     scroll_to_element(element)
-    top = element.size['width']*0.6 - element.size['height']
-    save_element(element, code, 'img_controller', y=top)
+    top = get_bottom_element_top(element)
+    if top > 0:  # 到底了
+        save_element(element, code, 'img_controller', y=top)
+    else:
+        save_element(element, code, 'img_controller', )
+    # window_height = driver.get_window_size()['height']
+    # top = element.size['width']*0.6 - element.size['height']
+    # top = window_height - element.size['height'] * 2.25
+    # save_element(element, code, 'img_controller', y=top)
+
+
+def get_bottom_element_top(element):
+    # 开始计算
+    window_height = driver.get_window_size().get('height')
+    doc_height = driver.find_element_by_tag_name('html').size['height']
+    element_y = element.location['y']
+    bottom_distance = doc_height - element_y
+    dy = 120  # 补差值
+    top = window_height - bottom_distance - dy
+    util.log('window_height %f' % window_height)
+    util.log('doc_height %f' % doc_height)
+    util.log('element_y %f' % element_y)
+    util.log('bottom_distance %f' % bottom_distance)
+    util.log('top %f ' % top)
+    return top
 
 
 def grab_ths_worth(code):
@@ -300,12 +335,14 @@ def grab_ths_worth(code):
     # element = element_list[2]
     # scroll_to_element(element)
     # save_element(element, code, 'img_worth_forecast_table')
-    element = driver.find_elements_by_css_selector(".m_table.m_hl.posi_table")[0]
-    scroll_to_element(element)
-    save_element(element, code, 'img_worth_forecast_table')
-    element = driver.find_elements_by_css_selector(".m_table.m_hl.ggintro.ggintro_1.organData")[0]
-    scroll_to_element(element)
-    save_element(element, code, 'img_worth_forecast_table2')
+    element_list = driver.find_elements_by_css_selector(".m_table.m_hl.posi_table")
+    if len(element_list) > 0:
+        element = element_list[0]
+        scroll_to_element(element)
+        save_element(element, code, 'img_worth_forecast_table')
+        element = driver.find_elements_by_css_selector(".m_table.m_hl.ggintro.ggintro_1.organData")[0]
+        scroll_to_element(element)
+        save_element(element, code, 'img_worth_forecast_table2')
 
 
 def grab_ths_news(code):
@@ -382,13 +419,28 @@ def grab_ths_event(code):
     url = 'http://basic.10jqka.com.cn/%s/event.html' % code
     driver.get(url)
     driver.implicitly_wait(30)
-    element = driver.find_element_by_id("manager")
-    scroll_to_element(element)
-    hide_float_search()
-    save_element(element, code, 'img_event_manager')
-    element = driver.find_element_by_id("holder")
-    scroll_to_element(element)
-    save_element(element, code, 'img_event_holder')
+    # 高管持股变动
+    try:
+        parent = driver.find_element_by_id("manager")
+        element = parent.find_element_by_css_selector('.m_table_data.pagination')
+        scroll_to_element(element)
+        hide_float_search()
+        save_element(element, code, 'img_event_manager')
+    except NoSuchElementException:
+        head = driver.find_element_by_class_name('header')
+        driver.execute_script('$(arguments[0]).fadeOut()', head)
+    # 股东持股变动
+    try:
+        parent = driver.find_element_by_id("holder")
+        element = parent.find_element_by_css_selector('.m_table_data.pagination')
+        scroll_to_element(element)
+        top = get_bottom_element_top(element)
+        if top > 0:  # 到底了
+            save_element(element, code, 'img_event_holder', y=top)
+        else:
+            save_element(element, code, 'img_event_holder', )
+    except NoSuchElementException:
+        pass
 
 
 def scroll_to_element(element):
@@ -441,15 +493,15 @@ def start(code):
 
 
 if __name__ == '__main__':
-    code = '600519'
+    code = config.CODE
     # driver.execute_script("document.body.style.zoom='80%'")
     # driver.maximize_window()
     # grab_lxr_data(code)
-    # grab_ths_trend(code)
+    grab_ths_trend(code)
     # grab_ths_brief(code)
     # grab_ths_operate(code)
-    grab_ths_holder(code)
-    # grab_ths_worth(code)
+    # grab_ths_holder(code)
+    # grab_ths_worth(config.CODE)
     # grab_ths_news(code)
     # grab_ths_position(code)
     # grab_ths_bonus(code)
