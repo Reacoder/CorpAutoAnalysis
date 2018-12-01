@@ -61,7 +61,7 @@ def write_article(code):
     # 标题
     element_title.send_keys(my_dict['code_name'])
     # 走势图
-    element_content.send_keys('走势图' + '\n')
+    element_content.send_keys('\n' + '走势图' + '\n')
     element_content.send_keys('1.周k线' + '\n')
     element_file.send_keys(my_dir + 'img_trend_week.png')
     sleep()
@@ -166,7 +166,7 @@ def write_article(code):
         element_file.send_keys(my_dir + 'img_worth_forecast_table2.png')
         sleep()
     # 插播广告
-    element_content.send_keys('\n' + '***** 如果你需要自己所关心个股的这种文档，请加我微信：Reacoder​ *****' + '\n')
+    element_content.send_keys('\n' + '***** 如果你需要自己所关心个股的这种文档，请加我徽信：Reacoder​ *****' + '\n')
     element_file.send_keys(config.LOCAL_DIR + 'qr_code.jpeg')
     sleep()
     # 六.估值分析
