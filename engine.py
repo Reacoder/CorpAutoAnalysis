@@ -379,7 +379,10 @@ def grab_ths_news(code):
         driver.implicitly_wait(10)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        element = driver.find_element_by_css_selector(".YBText")
+        try:
+            element = driver.find_element_by_css_selector(".YBText")
+        except NoSuchElementException:
+            element = driver.find_element_by_id('news_content')
         util.save_file(code, 'file_worth', element.text + "\n" * 4, mode='a')
         driver.switch_to.window(window_before)
         driver.implicitly_wait(10)
@@ -508,13 +511,13 @@ if __name__ == '__main__':
     code = config.CODE
     # driver.execute_script("document.body.style.zoom='80%'")
     # driver.maximize_window()
-    grab_lxr_data(code)
+    # grab_lxr_data(code)
     # grab_ths_trend(code)
     # grab_ths_brief(code)
     # grab_ths_operate(code)
     # grab_ths_holder(code)
     # grab_ths_worth(config.CODE)
-    # grab_ths_news(code)
+    grab_ths_news(code)
     # grab_ths_position(code)
     # grab_ths_bonus(code)
     # grab_ths_event(code)
