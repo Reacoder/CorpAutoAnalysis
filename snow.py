@@ -59,7 +59,7 @@ def write_article(code):
     parent = driver.find_element_by_css_selector('.sb-editor__upload')
     element_file = parent.find_element_by_name('file')
     # 标题
-    element_title.send_keys(my_dict['code_name'])
+    element_title.send_keys(my_dict['code_name'] + '，分析分析')
     # 走势图
     element_content.send_keys('\n' + '走势图' + '\n')
     element_content.send_keys('1.周k线' + '\n')
@@ -120,9 +120,10 @@ def write_article(code):
         sleep()
     else:
         element_content.send_keys('无高管持股变动' + '\n')
-    element_content.send_keys('7.股东持股变动' + '\n')
-    element_file.send_keys(my_dir + 'img_event_holder.png')
-    sleep()
+    if os.path.isfile(my_dir + 'img_event_holder.png'):
+        element_content.send_keys('7.股东持股变动' + '\n')
+        element_file.send_keys(my_dir + 'img_event_holder.png')
+        sleep()
     element_content.send_keys('8.分红情况' + '\n')
     element_file.send_keys(my_dir + 'img_bonus.png')
     sleep()

@@ -64,8 +64,9 @@ def generate_doc():
         document.add_picture(my_dir + 'img_event_manager.png', width=pic_width)
     else:
         document.add_paragraph('无高管持股变动')
-    document.add_heading('7.股东持股变动', level=2)
-    document.add_picture(my_dir + 'img_event_holder.png', width=pic_width)
+    if os.path.isfile(my_dir + 'img_event_holder.png'):
+        document.add_heading('7.股东持股变动', level=2)
+        document.add_picture(my_dir + 'img_event_holder.png', width=pic_width)
     document.add_heading('8.分红情况', level=2)
     document.add_picture(my_dir + 'img_bonus.png', width=pic_width)
     # 四.生意特征
