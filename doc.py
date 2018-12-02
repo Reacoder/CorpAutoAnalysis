@@ -142,7 +142,7 @@ def generate_doc():
     document.add_heading('十一.董事会经营评述', level=1)
     document.add_paragraph(util.read_file(code, 'file_operate'))
     # 保存文档
-    document.save('private/' + code + '/' + 'analysis' + r'.docx')
+    document.save('private/' + code + '/' + my_dict['code_name'] + r'.docx')
     util.log('成功生成文档')
 
 

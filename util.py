@@ -82,7 +82,7 @@ def create_path(path):
 
 def get_code_type(code):
     code_type = 'sh'
-    if code[0] == '0':
+    if code[0] == '0' or code[0] == '3':
         code_type = 'sz'
     return code_type
 
