@@ -39,7 +39,7 @@ def login_snow():
         login_btn = driver.find_element_by_css_selector('.modal__login__btn')
         login_btn.click()
         util.log('点击登陆按钮')
-        time.sleep(12)
+        time.sleep(30)
         util.save_cookie(driver, cookie_path)
         util.log('登陆成功')
 
