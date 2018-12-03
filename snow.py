@@ -176,7 +176,7 @@ def write_article(code):
         sleep()
     # 插播广告
     util.log('插播广告')
-    element_content.send_keys('\n' + '***** 如果你需要自己所关心个股的这种文档，请加我徽信：Reacoder​ 或者关注 美旺新高 公众号 *****' + '\n')
+    element_content.send_keys('\n' + '***** 如果你需要个股的这种文档，请加我徽信：Reacoder​ 或者关注 美旺新高 公众号 *****' + '\n')
     element_file.send_keys(config.LOCAL_DIR + 'qr_code.jpg')
     sleep()
     # 六.估值分析
