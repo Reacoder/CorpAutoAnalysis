@@ -361,34 +361,37 @@ def grab_ths_news(code):
     url = 'http://basic.10jqka.com.cn/%s/news.html' % code
     driver.get(url)
     driver.implicitly_wait(30)
-    element = driver.find_element_by_css_selector(".bd.m_dlbox")
-    scroll_to_element(element)
-    # 研报评级
-    tr_list = driver.find_elements_by_css_selector(".organ_item")
+    try:
+        element = driver.find_element_by_css_selector(".bd.m_dlbox")
+        scroll_to_element(element)
+        # 研报评级
+        tr_list = driver.find_elements_by_css_selector(".organ_item")
 
-    i = 1
-    for tr in tr_list:
-        link = tr.find_element_by_css_selector(".client.pagescroll")
-        td_list = tr.find_elements_by_tag_name('td')
-        title = td_list[1].text + "\n" + td_list[2].text + "\n" + td_list[3].text + "\n"
-        title = title + "-" * 50 + "\n"
-        util.save_file(code, 'file_worth', title, mode='a')
+        i = 1
+        for tr in tr_list:
+            link = tr.find_element_by_css_selector(".client.pagescroll")
+            td_list = tr.find_elements_by_tag_name('td')
+            title = td_list[1].text + "\n" + td_list[2].text + "\n" + td_list[3].text + "\n"
+            title = title + "-" * 50 + "\n"
+            util.save_file(code, 'file_worth', title, mode='a')
 
-        window_before = driver.window_handles[0]
-        link.click()
-        driver.implicitly_wait(10)
-        window_after = driver.window_handles[1]
-        driver.switch_to.window(window_after)
-        try:
-            element = driver.find_element_by_css_selector(".YBText")
-        except NoSuchElementException:
-            element = driver.find_element_by_id('news_content')
-        util.save_file(code, 'file_worth', element.text + "\n" * 4, mode='a')
-        driver.switch_to.window(window_before)
-        driver.implicitly_wait(10)
-        if i == config.WORTH_COUNT:
-            break
-        i = i + 1
+            window_before = driver.window_handles[0]
+            link.click()
+            driver.implicitly_wait(10)
+            window_after = driver.window_handles[1]
+            driver.switch_to.window(window_after)
+            try:
+                element = driver.find_element_by_css_selector(".YBText")
+            except NoSuchElementException:
+                element = driver.find_element_by_id('news_content')
+            util.save_file(code, 'file_worth', element.text + "\n" * 4, mode='a')
+            driver.switch_to.window(window_before)
+            driver.implicitly_wait(10)
+            if i == config.WORTH_COUNT:
+                break
+            i = i + 1
+    except NoSuchElementException:
+        pass
 
 
 # def grab_ths_concept(code):
@@ -464,8 +467,11 @@ def scroll_to_element(element):
 def hide_float_search():
     head = driver.find_element_by_class_name('header')
     driver.execute_script('$(arguments[0]).fadeOut()', head)
-    search = driver.find_element_by_css_selector('.iwc_searchbar.clearfix.float_box')
-    driver.execute_script('$(arguments[0]).fadeOut()', search)
+    try:
+        search = driver.find_element_by_css_selector('.iwc_searchbar.clearfix.float_box')
+        driver.execute_script('$(arguments[0]).fadeOut()', search)
+    except NoSuchElementException:
+        pass
     time.sleep(1)
 
 
