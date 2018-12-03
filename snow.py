@@ -60,8 +60,10 @@ def write_article(code):
     parent = driver.find_element_by_css_selector('.sb-editor__upload')
     element_file = parent.find_element_by_name('file')
     # 标题
+    util.log('标题')
     element_title.send_keys(my_dict['code_name'])
     # 走势图
+    util.log('走势图')
     element_content.send_keys('\n' + '走势图' + '\n')
     element_content.send_keys('1.周k线' + '\n')
     element_file.send_keys(my_dir + 'img_trend_week.png')
@@ -70,10 +72,12 @@ def write_article(code):
     element_file.send_keys(my_dir + 'img_trend_day.png')
     sleep()
     # 一.公司概要
+    util.log('一.公司概要')
     element_content.send_keys('一.公司概要' + '\n')
     element_file.send_keys(my_dir + 'img_brief.png')
     sleep()
     # 二.业务构成
+    util.log('二.业务构成')
     element_content.send_keys('二.业务构成' + '\n')
     element_file.send_keys(my_dir + 'img_operate_product.png')
     sleep()
@@ -99,6 +103,7 @@ def write_article(code):
         element_file.send_keys(my_dir + 'img_costs_finance_fee_rate.png')
         sleep()
     # 三.股东占比情况
+    util.log('三.股东占比情况')
     element_content.send_keys('三.股东占比情况' + '\n')
     element_content.send_keys('1.股东人数' + '\n')
     element_file.send_keys(my_dir + 'img_holder_count.png')
@@ -129,6 +134,7 @@ def write_article(code):
     element_file.send_keys(my_dir + 'img_bonus.png')
     sleep()
     # 四.生意特征
+    util.log('四.生意特征')
     element_content.send_keys('四.生意特征' + '\n')
     element_content.send_keys('1.主要客户及供应商' + '\n')
     if os.path.isfile(my_dir + 'img_operate_partner.png'):
@@ -157,6 +163,7 @@ def write_article(code):
     element_file.send_keys(my_dir + 'img_profit_profit_rate.png')
     sleep()
     # 五.成长性评估
+    util.log('五.成长性评估')
     element_content.send_keys('五.成长性评估' + '\n')
     element_content.send_keys('1.业绩预测' + '\n')
     element_file.send_keys(my_dir + 'img_worth_forecast.png')
@@ -168,10 +175,12 @@ def write_article(code):
         element_file.send_keys(my_dir + 'img_worth_forecast_table2.png')
         sleep()
     # 插播广告
+    util.log('插播广告')
     element_content.send_keys('\n' + '***** 如果你需要自己所关心个股的这种文档，请加我徽信：Reacoder​ *****' + '\n')
     element_file.send_keys(config.LOCAL_DIR + 'qr_code.jpeg')
     sleep()
     # 六.估值分析
+    util.log('六.估值分析')
     element_content.send_keys('六.估值分析' + '\n')
     element_content.send_keys('1.PE-TTM (扣非)' + '\n')
     element_content.send_keys(my_dict['pe'].replace('\n', ' ' * 3) + '\n')
@@ -186,6 +195,7 @@ def write_article(code):
     element_file.send_keys(my_dir + 'img_valuation_ps.png')
     sleep()
     # 七.收入，利润，现金流分析
+    util.log('七.收入，利润，现金流分析')
     element_content.send_keys('七.收入，利润，现金流分析' + '\n')
     element_content.send_keys('1.营业总收入' + '\n')
     element_content.send_keys(my_dict['total_income'].replace('\n', ' ' * 3) + '\n')
@@ -204,6 +214,7 @@ def write_article(code):
     element_file.send_keys(my_dir + 'img_growth_cash_flow.png')
     sleep()
     # 八.资产负债分析
+    util.log('八.资产负债分析')
     element_content.send_keys('八.资产负债分析' + '\n')
     if os.path.isfile(my_dir + 'img_asset.png') and os.path.isfile(my_dir + 'img_debt.png'):
         element_content.send_keys('1.资产分析' + '\n')
@@ -215,12 +226,15 @@ def write_article(code):
     else:
         element_content.send_keys('特殊行业无资产负债分析' + '\n')
     # 九.券商分析
+    util.log('九.券商分析')
     element_content.send_keys('九.券商分析' + '\n')
     element_content.send_keys(util.read_file(code, 'file_worth') + '\n')
     # 十.题材要点
+    util.log('十.题材要点')
     element_content.send_keys('十.题材要点' + '\n')
     element_content.send_keys(util.read_file(code, 'file_concept') + '\n')
     # 十一.董事会经营评述
+    util.log('十一.董事会经营评述')
     element_content.send_keys('十一.董事会经营评述' + '\n')
     element_content.send_keys(util.read_file(code, 'file_operate') + '\n')
 
