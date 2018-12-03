@@ -60,7 +60,7 @@ def write_article(code):
     parent = driver.find_element_by_css_selector('.sb-editor__upload')
     element_file = parent.find_element_by_name('file')
     # 标题
-    element_title.send_keys(my_dict['code_name'] + '，分析分析')
+    element_title.send_keys(my_dict['code_name'])
     # 走势图
     element_content.send_keys('\n' + '走势图' + '\n')
     element_content.send_keys('1.周k线' + '\n')
