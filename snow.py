@@ -71,6 +71,9 @@ def write_article(code):
     element_content.send_keys('2.日k线' + '\n')
     element_file.send_keys(my_dir + 'img_trend_day.png')
     sleep()
+    # 插播广告
+    util.log('插播广告')
+    element_content.send_keys('\n' + '***** 如果你需要个股的这种文档，请加我徽信：Reacoder​ 或者关注 美旺新高 公众号 *****' + '\n')
     # 一.公司概要
     util.log('一.公司概要')
     element_content.send_keys('一.公司概要' + '\n')
