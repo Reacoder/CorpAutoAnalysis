@@ -12,7 +12,8 @@ import util
 from private.account import LXR
 
 driver = webdriver.Chrome()
-driver.set_window_position(-2000, 0)
+if config.HIDE:
+    driver.set_window_position(-2000, 0)
 lxr = LXR()
 cookie_path = 'private/cookie_snow.txt'
 
